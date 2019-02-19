@@ -1,14 +1,13 @@
 defmodule BtrzExApiClient do
   @moduledoc """
-  Main module for handling sending requests to Betterez's API
+  Main module to handle requests to the Betterez's APIs.
   """
 
-  @http_client Application.get_env(:btrz_ex_api_client, :http_client) || HTTPoison
-  @client_version Mix.Project.config()[:version]
+  alias BtrzExApiClient.Types
 
-  def version do
-    @client_version
-  end
+  @http_client Application.get_env(:btrz_ex_api_client, :http_client) || BtrzExApiClient.HTTPoison
+  @client_version Mix.Project.config()[:version]
+  @allowed_methods [:get, :post, :put, :patch, :delete]
 
   defmodule APIConnectionError do
     @moduledoc """
@@ -37,6 +36,40 @@ defmodule BtrzExApiClient do
     Invalid request errors arise when your request has invalid parameters.
     """
     defexception type: "invalid_request_error", code: nil, status: nil, message: nil, param: nil
+  end
+
+  @doc """
+  This function will prepare and do the request through the HTTP client and will handle success and errors responses.
+
+  ## Options
+
+    * `:x_api_key` - Optional. This value will be placed in the `x-api-key` header.
+    * `:internal` - Optional. Boolean. If `true` it will use the main/secondary keys (passed via config) for getting an internal JWT to be set in the `Authorization` header. Defaults to `false`.
+    * `:token` - Optional. Set the JWT in the `Authorization` header. If `:internal` option is `true`, this option will be discarded.
+
+  """
+  @spec request(
+          Types.methods(),
+          String.t(),
+          iolist(),
+          map(),
+          keyword()
+        ) ::
+          {:error,
+           %BtrzExApiClient.APIConnectionError{}
+           | %BtrzExApiClient.APIError{}
+           | %BtrzExApiClient.AuthenticationError{}
+           | %BtrzExApiClient.InvalidRequestError{}}
+          | {:ok, term()}
+  def request(action, endpoint, query, body, opts)
+      when action in @allowed_methods do
+    @http_client.request(
+      action,
+      request_url(endpoint, query),
+      Jason.encode!(body),
+      create_headers(opts)
+    )
+    |> handle_response
   end
 
   defp request_url(endpoint) do
@@ -80,33 +113,6 @@ defmodule BtrzExApiClient do
       true ->
         headers
     end
-  end
-
-  @doc """
-  This function will prepare the request through the HTTP client and will handle success and errors responses.
-  """
-  @spec request(
-          :delete | :get | :post | :put | :patch,
-          binary(),
-          list(),
-          any(),
-          list()
-        ) ::
-          {:error,
-           %BtrzExApiClient.APIConnectionError{}
-           | %BtrzExApiClient.APIError{}
-           | %BtrzExApiClient.AuthenticationError{}
-           | %BtrzExApiClient.InvalidRequestError{}}
-          | {:ok, any()}
-  def request(action, endpoint, query, body, opts)
-      when action in [:get, :post, :put, :patch, :delete] do
-    @http_client.request(
-      action,
-      request_url(endpoint, query),
-      Jason.encode!(body),
-      create_headers(opts)
-    )
-    |> handle_response
   end
 
   defp handle_response({:ok, %{body: body, status_code: status_code}})

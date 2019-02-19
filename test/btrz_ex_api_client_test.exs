@@ -57,7 +57,11 @@ defmodule BtrzExApiClientTest do
   end
 
   test "import users with the correct params" do
-    payload = [%{"id" => "1234bGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9", "email" => "test@betterez.com"}]
+    payload = %{
+      "users" => [
+        %{"id" => "1234bGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9", "email" => "test@betterez.com"}
+      ]
+    }
 
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, endpoint, data, _headers ->

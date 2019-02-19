@@ -10,9 +10,7 @@ API documentation at HexDocs [https://hexdocs.pm/btrz_ex_api_client](https://hex
 
 ```elixir
 def deps do
-  [
-    {:btrz_ex_api_client, "~> 0.1.0"}
-  ]
+  [{:btrz_ex_api_client, "~> 0.1.0"}]
 end
 ```
 
@@ -38,11 +36,11 @@ config :btrz_ex_api_client, :internal_token,
 
 Depending your resource, it will implement the basic CRUD actions and will be invoked as follows:
 
-  * `BtrzExApiClient.{RESOURCE}.create/2`
-  * `BtrzExApiClient.{RESOURCE}.retrieve/2`
-  * `BtrzExApiClient.{RESOURCE}.update/3`
-  * `BtrzExApiClient.{RESOURCE}.list/2`
-  * `BtrzExApiClient.{RESOURCE}.delete/3`
+  * `BtrzExApiClient.{RESOURCE}.create/2` (POST)
+  * `BtrzExApiClient.{RESOURCE}.retrieve/2` (GET)
+  * `BtrzExApiClient.{RESOURCE}.update/3` (PUT)
+  * `BtrzExApiClient.{RESOURCE}.list/2` (GET)
+  * `BtrzExApiClient.{RESOURCE}.delete/3` (DELETE)
 
 The endpoints will return `{:ok, response}` or `{:error, ERROR_STRUCT}`, depending the case.
 
@@ -54,6 +52,8 @@ The endpoints will return `{:ok, response}` or `{:error, ERROR_STRUCT}`, dependi
 
 ## Adding new endpoints
 Please be careful with the folder structure, this example is under `lib/btrz_ex_api_client/accounts/`
+The `use BtrzExApiClient.API` macro will receive a list of `:atoms` of the pre-defined actions desired.
+
 ```elixir
 defmodule BtrzExApiClient.Accounts.User do
   use BtrzExApiClient.API, [:list, :create, :retrieve, :delete, :update]
@@ -85,7 +85,7 @@ end
 ```
 
 ## Betterez Auth
-Betterez API's use the `x-api-key` and `Authorization` headers, depending the endpoint, they can be send via the `opts` param:
+Betterez API's use the `x-api-key` and `Authorization` headers, depending the endpoint, they can be sent via the `opts` param:
 
   * `BtrzExApiClient.Accounts.User.list([x_api_key: my_x_api_key])` - will add the `x-api-key` header.
   * `BtrzExApiClient.Accounts.User.list([x_api_key: my_x_api_key, internal: true])` - will request an internal token to the Betterez provider using the config keys and will add it to the `Authorization` header (using the Bearer JWT).

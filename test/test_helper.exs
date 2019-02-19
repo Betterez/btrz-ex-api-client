@@ -1,3 +1,3 @@
 ExUnit.start()
 
-Mox.defmock(BtrzExApiClient.HTTPClientMock, for: BtrzExApiClient.HTTPClientApi)
+Mox.defmock(BtrzExApiClient.HTTPClientMock, for: BtrzExApiClient.HTTPClient)

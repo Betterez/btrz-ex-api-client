@@ -2,7 +2,7 @@ defmodule BtrzExApiClient.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/Betterez/btrz-ex-api-client"
-  @version "0.1.0"
+  @version "0.1.1"
 
   def project do
     [
@@ -12,16 +12,12 @@ defmodule BtrzExApiClient.MixProject do
       homepage_url: @github_url,
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       docs: docs(),
       package: package(),
       description: description()
     ]
   end
-
-  defp elixirc_paths(:test), do: ["test/support", "lib"]
-  defp elixirc_paths(_), do: ["lib"]
 
   def description do
     "Betterez API Client for Elixir"
