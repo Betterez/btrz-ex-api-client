@@ -25,7 +25,7 @@ defmodule BtrzExApiClient.MixProject do
 
   def package do
     [
-      name: "btrz-ex-api-client",
+      name: "btrz_ex_api_client",
       maintainers: ["Betterez"],
       licenses: ["MIT"],
       links: %{"GitHub" => @github_url}
