@@ -1,6 +1,17 @@
 defmodule BtrzExApiClient.API do
   defmacro __using__(opts) do
     quote do
+      if :request in unquote(opts) do
+        @doc """
+        Request a generic endpoint in #{
+          __MODULE__ |> to_string |> String.split(".") |> List.last()
+        }
+        """
+        def request(action, endpoint, query \\ [], body \\ %{}, opts \\ []) do
+          BtrzExApiClient.request(action, path(endpoint), query, body, opts)
+        end
+      end
+
       if :create in unquote(opts) do
         @doc """
         Create a(n) #{__MODULE__ |> to_string |> String.split(".") |> List.last()}

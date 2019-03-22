@@ -2,7 +2,7 @@ defmodule BtrzExApiClient.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/Betterez/btrz-ex-api-client"
-  @version "0.1.5"
+  @version "0.2.0"
 
   def project do
     [
@@ -44,7 +44,7 @@ defmodule BtrzExApiClient.MixProject do
     [
       {:httpoison, "~> 1.4"},
       {:jason, "~> 1.1"},
-      {:btrz_ex_auth_api, "~> 0.10.4"},
+      {:btrz_ex_auth_api, "~> 0.10.5"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:mox, "~> 0.4", only: :test}
     ]

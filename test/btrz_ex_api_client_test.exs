@@ -77,6 +77,74 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Accounts.User.import(payload)
   end
 
+  test "call a custom path for Accounts service" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    query = [field: "val"]
+    data = %{key: "val"}
+
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, reqdata, headers ->
+      assert action == :get
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}a/path?field=val"
+      assert reqdata == Jason.encode!(data)
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Accounts.request(:get, "a/path", query, data, x_api_key: key)
+  end
+
+  test "call a custom path for Inventory service" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    query = [field: "val"]
+    data = %{key: "val"}
+
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, reqdata, headers ->
+      assert action == :post
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:inventory]}a/path?field=val"
+      assert reqdata == Jason.encode!(data)
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Inventory.request(:post, "a/path", query, data, x_api_key: key)
+  end
+
+  test "call a custom path for Operations service" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    query = [field: "val"]
+    data = %{key: "val"}
+
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, reqdata, headers ->
+      assert action == :put
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:operations]}a/path?field=val"
+      assert reqdata == Jason.encode!(data)
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Operations.request(:put, "a/path", query, data, x_api_key: key)
+  end
+
+  test "call a custom path for Webhooks service" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    query = [field: "val"]
+    data = %{key: "val"}
+
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, reqdata, headers ->
+      assert action == :patch
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:webhooks]}a/path?field=val"
+      assert reqdata == Jason.encode!(data)
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Webhooks.request(:patch, "a/path", query, data, x_api_key: key)
+  end
+
   defp find_header(headers, header_key) do
     Enum.find(headers, fn {k, _v} ->
       k == header_key
