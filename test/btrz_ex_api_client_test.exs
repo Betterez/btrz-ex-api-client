@@ -85,7 +85,10 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, endpoint, reqdata, headers ->
       assert action == :get
-      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}a/path?field=val"
+
+      assert endpoint ==
+               "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}a/path?field=val"
+
       assert reqdata == Jason.encode!(data)
       assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
       {:ok, %{body: "{}", status_code: 200}}
@@ -102,7 +105,10 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, endpoint, reqdata, headers ->
       assert action == :post
-      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:inventory]}a/path?field=val"
+
+      assert endpoint ==
+               "#{Application.get_env(:btrz_ex_api_client, :services)[:inventory]}a/path?field=val"
+
       assert reqdata == Jason.encode!(data)
       assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
       {:ok, %{body: "{}", status_code: 200}}
@@ -119,7 +125,10 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, endpoint, reqdata, headers ->
       assert action == :put
-      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:operations]}a/path?field=val"
+
+      assert endpoint ==
+               "#{Application.get_env(:btrz_ex_api_client, :services)[:operations]}a/path?field=val"
+
       assert reqdata == Jason.encode!(data)
       assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
       {:ok, %{body: "{}", status_code: 200}}
@@ -136,7 +145,10 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, endpoint, reqdata, headers ->
       assert action == :patch
-      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:webhooks]}a/path?field=val"
+
+      assert endpoint ==
+               "#{Application.get_env(:btrz_ex_api_client, :services)[:webhooks]}a/path?field=val"
+
       assert reqdata == Jason.encode!(data)
       assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
       {:ok, %{body: "{}", status_code: 200}}
