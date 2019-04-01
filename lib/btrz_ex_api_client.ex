@@ -13,6 +13,7 @@ defmodule BtrzExApiClient do
     @moduledoc """
     Failure to connect to Betterez's API.
     """
+    @derive Jason.Encoder
     defexception type: "api_connection_error", code: nil, message: nil
   end
 
@@ -21,6 +22,7 @@ defmodule BtrzExApiClient do
     API errors cover any other type of problem (e.g., a temporary problem with
     Betterez's servers) and are extremely uncommon.
     """
+    @derive Jason.Encoder
     defexception type: "api_error", code: nil, status: nil, message: nil
   end
 
@@ -28,6 +30,7 @@ defmodule BtrzExApiClient do
     @moduledoc """
     Failure to properly authenticate yourself in the request.
     """
+    @derive Jason.Encoder
     defexception type: "authentication_error", code: nil, status: nil, message: nil
   end
 
@@ -35,6 +38,7 @@ defmodule BtrzExApiClient do
     @moduledoc """
     Invalid request errors arise when your request has invalid parameters.
     """
+    @derive Jason.Encoder
     defexception type: "invalid_request_error", code: nil, status: nil, message: nil, param: nil
   end
 
