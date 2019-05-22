@@ -12,7 +12,7 @@ defmodule BtrzExApiClient.Inventory.Station do
     path() <> "/import"
   end
 
-  def import(data, opts \\ []) do
-    BtrzExApiClient.request(:post, import_path(), [], data, opts)
+  def import(data, headers \\ [], opts \\ []) do
+    BtrzExApiClient.request(:post, import_path(), [], data, headers, opts)
   end
 end
