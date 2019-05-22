@@ -12,7 +12,7 @@ defmodule BtrzExApiClient.Accounts.Lexicon do
     path() <> "/buscompany"
   end
 
-  def buscompany(opts \\ []) do
-    BtrzExApiClient.request(:get, buscompany_path(), [], %{}, opts)
+  def buscompany(headers \\ [], opts \\ []) do
+    BtrzExApiClient.request(:get, buscompany_path(), [], %{}, headers, opts)
   end
 end

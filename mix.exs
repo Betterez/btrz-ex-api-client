@@ -2,7 +2,7 @@ defmodule BtrzExApiClient.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/Betterez/btrz-ex-api-client"
-  @version "0.4.0"
+  @version "0.4.1"
 
   def project do
     [
