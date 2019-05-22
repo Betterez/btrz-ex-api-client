@@ -2,7 +2,7 @@ defmodule BtrzExApiClient.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/Betterez/btrz-ex-api-client"
-  @version "0.3.5"
+  @version "0.4.0"
 
   def project do
     [
@@ -55,7 +55,31 @@ defmodule BtrzExApiClient.MixProject do
       main: "BtrzExApiClient",
       source_ref: "v#{@version}",
       source_url: @github_url,
-      extras: ["README.md"]
+      extras: ["README.md"],
+      groups_for_modules: groups_for_modules()
+    ]
+  end
+
+  defp groups_for_modules do
+    [
+      Accounts: [
+        BtrzExApiClient.Accounts.Account,
+        BtrzExApiClient.Accounts.Lexicon,
+        BtrzExApiClient.Accounts.Permission,
+        BtrzExApiClient.Accounts.Role,
+        BtrzExApiClient.Accounts.User
+      ],
+      Inventory: [
+        BtrzExApiClient.Inventory.Station
+      ],
+      Operations: [
+        BtrzExApiClient.Operations.Ticket,
+        BtrzExApiClient.Operations.Transaction
+      ],
+      Webhooks: [
+        BtrzExApiClient.Webhooks.Subscription,
+        BtrzExApiClient.Webhooks.Undelivered
+      ]
     ]
   end
 end

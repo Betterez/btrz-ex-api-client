@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Operations.Ticket do
-  @moduledoc false
+  @moduledoc """
+  Available Ticket endpoints in `btrz-api-operations`.
+  """
   use BtrzExApiClient.API, [:retrieve]
 
   def path do

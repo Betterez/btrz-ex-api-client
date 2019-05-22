@@ -7,6 +7,7 @@ defmodule BtrzExApiClient.HTTPClient do
               method :: Types.methods(),
               url :: String.t(),
               body :: map(),
-              headers :: Type.headers()
+              headers :: Types.headers(),
+              opts :: Keyword.t()
             ) :: {:ok, response :: term()} | Type.error()
 end

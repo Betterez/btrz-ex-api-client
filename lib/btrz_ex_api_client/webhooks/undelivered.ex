@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Webhooks.Undelivered do
-  @moduledoc false
+  @moduledoc """
+  Available Undelivered endpoints in `btrz-api-webhooks`.
+  """
   use BtrzExApiClient.API, [:create]
 
   def path do

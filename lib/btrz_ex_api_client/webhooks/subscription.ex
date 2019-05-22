@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Webhooks.Subscription do
-  @moduledoc false
+  @moduledoc """
+  Available Subscription endpoints in `btrz-api-webhooks`.
+  """
   use BtrzExApiClient.API, [:list]
 
   def path do

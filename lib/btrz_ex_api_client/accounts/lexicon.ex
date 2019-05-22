@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Accounts.Lexicon do
-  @moduledoc false
+  @moduledoc """
+  Available Lexicon endpoints in `btrz-api-accounts`.
+  """
   use BtrzExApiClient.API, [:create]
 
   def path do

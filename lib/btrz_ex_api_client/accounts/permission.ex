@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Accounts.Permission do
-  @moduledoc false
+  @moduledoc """
+  Available Permission endpoints in `btrz-api-accounts`.
+  """
   use BtrzExApiClient.API, [:list]
 
   def path do

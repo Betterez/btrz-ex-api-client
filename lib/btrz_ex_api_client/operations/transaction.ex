@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Operations.Transaction do
-  @moduledoc false
+  @moduledoc """
+  Available Transaction endpoints in `btrz-api-operations`.
+  """
   use BtrzExApiClient.API, [:retrieve]
 
   def path do

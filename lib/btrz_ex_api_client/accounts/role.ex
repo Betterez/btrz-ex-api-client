@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Accounts.Role do
-  @moduledoc false
+  @moduledoc """
+  Available Role endpoints in `btrz-api-accounts`.
+  """
   use BtrzExApiClient.API, [:list]
 
   def path do

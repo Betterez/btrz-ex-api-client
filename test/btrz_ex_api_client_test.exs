@@ -5,7 +5,7 @@ defmodule BtrzExApiClientTest do
 
   test "list users with the correct params" do
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, _data, _headers ->
+    |> expect(:request, fn action, endpoint, _data, _headers, _opts ->
       assert action == :get
       assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
       {:ok, %{body: "{}", status_code: 200}}
@@ -16,7 +16,7 @@ defmodule BtrzExApiClientTest do
 
   test "list users with the correct params using internal token" do
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, _data, headers ->
+    |> expect(:request, fn action, endpoint, _data, headers, _opts ->
       assert action == :get
       assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
       {"Authorization", bearer} = find_header(headers, "Authorization")
@@ -32,7 +32,7 @@ defmodule BtrzExApiClientTest do
       "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJidHJ6LWFwaS1jbGllbnQiLCJleHAiOjE1NTAyNDYzNjMsImlhdCI6MTU1MDI0NjI0MywiaXNzIjoiYnRyei1hcGktY2xpZW50IiwianRpIjoiYzE1OWRlZTktYzA3Yi00ZWVjLWFkYzEtZDlmMjE5ZmRlMDQzIiwibmJmIjoxNTUwMjQ2MjQyLCJzdWIiOnt9LCJ0eXAiOiJhY2Nlc3MifQ.Ca7SvDH5HZmjHA9uusIBw7cfP7RrKbMcNs_B9HHcIR_PZ5K9Hu3Y4L2BYhzUtwsojtoZmzmtXPM33IL7sCfPqw"
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, _data, headers ->
+    |> expect(:request, fn action, endpoint, _data, headers, _opts ->
       assert action == :get
       assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
       assert {"Authorization", "Bearer " <> ^token} = find_header(headers, "Authorization")
@@ -46,7 +46,7 @@ defmodule BtrzExApiClientTest do
     key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, _data, headers ->
+    |> expect(:request, fn action, endpoint, _data, headers, _opts ->
       assert action == :get
       assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
       assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
@@ -64,7 +64,7 @@ defmodule BtrzExApiClientTest do
     }
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, data, _headers ->
+    |> expect(:request, fn action, endpoint, data, _headers, _opts ->
       assert action == :post
 
       assert endpoint ==
@@ -83,7 +83,7 @@ defmodule BtrzExApiClientTest do
     data = %{key: "val"}
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, reqdata, headers ->
+    |> expect(:request, fn action, endpoint, reqdata, headers, _opts ->
       assert action == :get
 
       assert endpoint ==
@@ -103,7 +103,7 @@ defmodule BtrzExApiClientTest do
     data = %{key: "val"}
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, reqdata, headers ->
+    |> expect(:request, fn action, endpoint, reqdata, headers, _opts ->
       assert action == :post
 
       assert endpoint ==
@@ -123,7 +123,7 @@ defmodule BtrzExApiClientTest do
     data = %{key: "val"}
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, reqdata, headers ->
+    |> expect(:request, fn action, endpoint, reqdata, headers, _opts ->
       assert action == :put
 
       assert endpoint ==
@@ -143,7 +143,7 @@ defmodule BtrzExApiClientTest do
     data = %{key: "val"}
 
     BtrzExApiClient.HTTPClientMock
-    |> expect(:request, fn action, endpoint, reqdata, headers ->
+    |> expect(:request, fn action, endpoint, reqdata, headers, _opts ->
       assert action == :patch
 
       assert endpoint ==
@@ -157,6 +157,32 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Webhooks.request(:patch, "a/path", query, data, x_api_key: key)
   end
 
+  test "passing a timeout option to a generic request" do
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, _endpoint, _data, _headers, opts ->
+      assert action == :get
+      assert opts[:hackney] == [pool: :default]
+      assert opts[:recv_timeout] == 15_000
+
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.request(:get, "a/path", [], [], [], recv_timeout: 15_000)
+  end
+
+  test "passing a timeout option to a users request" do
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, _data, _headers, opts ->
+      assert action == :get
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
+      assert opts[:recv_timeout] == 15_000
+
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Accounts.User.list([internal: true], [], recv_timeout: 15_000)
+  end
+
   defp find_header(headers, header_key) do
     Enum.find(headers, fn {k, _v} ->
       k == header_key
@@ -166,7 +192,7 @@ defmodule BtrzExApiClientTest do
   describe "errors" do
     test "returns %AuthenticationError{} when the http client responds with 401" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:ok, %{body: ~s({"error": {"message": "unauthorized"}}), status_code: 401}}
       end)
 
@@ -176,7 +202,7 @@ defmodule BtrzExApiClientTest do
 
     test "returns %InvalidRequestError{} when the http client responds with 400" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:ok, %{body: ~s({"error": {"message": ""}}), status_code: 400}}
       end)
 
@@ -186,7 +212,7 @@ defmodule BtrzExApiClientTest do
 
     test "returns %InvalidRequestError{} when the http client responds with 404" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:ok, %{body: ~s({"error": {"message": "not found"}}), status_code: 404}}
       end)
 
@@ -196,7 +222,7 @@ defmodule BtrzExApiClientTest do
 
     test "returns %APIError{} when the http client responds with 500" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:ok, %{body: ~s({"error": {"message": "internal error"}}), status_code: 500}}
       end)
 
@@ -205,7 +231,7 @@ defmodule BtrzExApiClientTest do
 
     test "returns %APIError{} when the http client responds with 500 and empty body" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:ok, %{body: "", status_code: 500}}
       end)
 
@@ -214,7 +240,7 @@ defmodule BtrzExApiClientTest do
 
     test "returns %APIConnectionError{} when the http client responds with {:error, _}" do
       BtrzExApiClient.HTTPClientMock
-      |> expect(:request, fn _action, _endpoint, _data, _headers ->
+      |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
         {:error, %{reason: "error!"}}
       end)
 

@@ -45,11 +45,15 @@ defmodule BtrzExApiClient do
   @doc """
   This function will prepare and do the request through the HTTP client and will handle success and errors responses.
 
-  ## Options
+  ## headers
 
     * `:x_api_key` - Optional. This value will be placed in the `x-api-key` header.
     * `:internal` - Optional. Boolean. If `true` it will use the main/secondary keys (passed via config) for getting an internal JWT to be set in the `Authorization` header. Defaults to `false`.
     * `:token` - Optional. Set the JWT in the `Authorization` header. If `:internal` option is `true`, this option will be discarded.
+
+  ## options
+
+    Using the HTTPoison options (https://hexdocs.pm/httpoison/HTTPoison.Request.html)
 
   """
   @spec request(
@@ -57,6 +61,7 @@ defmodule BtrzExApiClient do
           String.t(),
           iolist(),
           map(),
+          keyword(),
           keyword()
         ) ::
           {:error,
@@ -65,13 +70,16 @@ defmodule BtrzExApiClient do
            | %BtrzExApiClient.AuthenticationError{}
            | %BtrzExApiClient.InvalidRequestError{}}
           | {:ok, term()}
-  def request(action, endpoint, query, body, opts)
+  def request(action, endpoint, query, body, headers, opts \\ [])
       when action in @allowed_methods do
+    opts = Keyword.merge([hackney: [pool: :default]], opts)
+
     @http_client.request(
       action,
       request_url(endpoint, query),
       Jason.encode!(body),
-      create_headers(opts)
+      create_headers(headers),
+      opts
     )
     |> handle_response
   end

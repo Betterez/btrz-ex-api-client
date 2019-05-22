@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Inventory.Station do
-  @moduledoc false
+  @moduledoc """
+  Available Station endpoints in `btrz-api-inventory`.
+  """
   use BtrzExApiClient.API, [:list]
 
   def path do

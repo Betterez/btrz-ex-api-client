@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Accounts.Account do
-  @moduledoc false
+  @moduledoc """
+  Available Account endpoints in `btrz-api-accounts`.
+  """
   use BtrzExApiClient.API, [:retrieve]
 
   def path do

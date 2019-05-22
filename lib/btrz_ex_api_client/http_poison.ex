@@ -6,7 +6,7 @@ defmodule BtrzExApiClient.HTTPoison do
   @behaviour BtrzExApiClient.HTTPClient
 
   @impl true
-  def request(action, endpoint, encoded_body, headers) do
-    HTTPoison.request(action, endpoint, encoded_body, headers, hackney: [pool: :default])
+  def request(action, endpoint, encoded_body, headers, opts) do
+    HTTPoison.request(action, endpoint, encoded_body, headers, opts)
   end
 end

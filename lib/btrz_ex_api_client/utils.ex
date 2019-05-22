@@ -1,7 +1,5 @@
 defmodule BtrzExApiClient.Utils do
-  @moduledoc """
-  Utility functions
-  """
+  @moduledoc false
 
   @doc """
   Encodes the given map or list of tuples.

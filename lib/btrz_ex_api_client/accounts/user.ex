@@ -1,5 +1,7 @@
 defmodule BtrzExApiClient.Accounts.User do
-  @moduledoc false
+  @moduledoc """
+  Available User endpoints in `btrz-api-accounts`.
+  """
   use BtrzExApiClient.API, [:list]
 
   def path do
