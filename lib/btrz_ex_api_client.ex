@@ -113,7 +113,7 @@ defmodule BtrzExApiClient do
 
   defp maybe_put_token(headers, opts) do
     cond do
-      Keyword.has_key?(opts, :internal) ->
+      opts[:internal] === true ->
         {:ok, token, _claims} =
           BtrzAuth.internal_auth_token(Application.get_env(:btrz_ex_api_client, :internal_token))
 

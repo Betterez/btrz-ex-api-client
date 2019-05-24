@@ -27,6 +27,18 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Accounts.User.list(internal: true)
   end
 
+  test "list users with the correct params explicity without internal token" do
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, _data, headers, _opts ->
+      assert action == :get
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:accounts]}users"
+      assert find_header(headers, "Authorization") == nil
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Accounts.User.list(internal: false)
+  end
+
   test "list users with the correct params using user token" do
     token =
       "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJidHJ6LWFwaS1jbGllbnQiLCJleHAiOjE1NTAyNDYzNjMsImlhdCI6MTU1MDI0NjI0MywiaXNzIjoiYnRyei1hcGktY2xpZW50IiwianRpIjoiYzE1OWRlZTktYzA3Yi00ZWVjLWFkYzEtZDlmMjE5ZmRlMDQzIiwibmJmIjoxNTUwMjQ2MjQyLCJzdWIiOnt9LCJ0eXAiOiJhY2Nlc3MifQ.Ca7SvDH5HZmjHA9uusIBw7cfP7RrKbMcNs_B9HHcIR_PZ5K9Hu3Y4L2BYhzUtwsojtoZmzmtXPM33IL7sCfPqw"
