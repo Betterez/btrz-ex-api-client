@@ -205,40 +205,58 @@ defmodule BtrzExApiClientTest do
     test "returns %AuthenticationError{} when the http client responds with 401" do
       BtrzExApiClient.HTTPClientMock
       |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
-        {:ok, %{body: ~s({"error": {"message": "unauthorized"}}), status_code: 401}}
+        {:ok, %{body: ~s({"message": "Unauthorized"}), status_code: 401}}
       end)
 
-      assert {:error, %BtrzExApiClient.AuthenticationError{}} =
-               BtrzExApiClient.request(:get, "", [], [], [])
+      assert {:error,
+              %BtrzExApiClient.AuthenticationError{
+                code: "UNAUTHORIZED",
+                message: "Unauthorized",
+                status: 401
+              }} = BtrzExApiClient.request(:get, "", [], [], [])
     end
 
     test "returns %InvalidRequestError{} when the http client responds with 400" do
       BtrzExApiClient.HTTPClientMock
       |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
-        {:ok, %{body: ~s({"error": {"message": ""}}), status_code: 400}}
+        {:ok, %{body: ~s({"code": "ANY_CODE", "message": "any message"}), status_code: 400}}
       end)
 
-      assert {:error, %BtrzExApiClient.InvalidRequestError{}} =
-               BtrzExApiClient.request(:get, "", [], [], [])
+      assert {:error,
+              %BtrzExApiClient.InvalidRequestError{
+                code: "ANY_CODE",
+                message: "any message",
+                status: 400
+              }} = BtrzExApiClient.request(:get, "", [], [], [])
     end
 
     test "returns %InvalidRequestError{} when the http client responds with 404" do
       BtrzExApiClient.HTTPClientMock
       |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
-        {:ok, %{body: ~s({"error": {"message": "not found"}}), status_code: 404}}
+        {:ok, %{body: ~s({"code": "NOT_FOUND", "message": "not found"}), status_code: 404}}
       end)
 
-      assert {:error, %BtrzExApiClient.InvalidRequestError{}} =
-               BtrzExApiClient.request(:get, "", [], [], [])
+      assert {:error,
+              %BtrzExApiClient.InvalidRequestError{
+                code: "NOT_FOUND",
+                message: "not found",
+                status: 404
+              }} = BtrzExApiClient.request(:get, "", [], [], [])
     end
 
     test "returns %APIError{} when the http client responds with 500" do
       BtrzExApiClient.HTTPClientMock
       |> expect(:request, fn _action, _endpoint, _data, _headers, _opts ->
-        {:ok, %{body: ~s({"error": {"message": "internal error"}}), status_code: 500}}
+        {:ok,
+         %{body: ~s({"code": "INTERNAL_ERROR", "message": "internal error"}), status_code: 500}}
       end)
 
-      assert {:error, %BtrzExApiClient.APIError{}} = BtrzExApiClient.request(:get, "", [], [], [])
+      assert {:error,
+              %BtrzExApiClient.APIError{
+                code: "INTERNAL_ERROR",
+                message: "internal error",
+                status: 500
+              }} = BtrzExApiClient.request(:get, "", [], [], [])
     end
 
     test "returns %APIError{} when the http client responds with 500 and empty body" do
@@ -247,7 +265,8 @@ defmodule BtrzExApiClientTest do
         {:ok, %{body: "", status_code: 500}}
       end)
 
-      assert {:error, %BtrzExApiClient.APIError{}} = BtrzExApiClient.request(:get, "", [], [], [])
+      assert {:error, %BtrzExApiClient.APIError{status: 500}} =
+               BtrzExApiClient.request(:get, "", [], [], [])
     end
 
     test "returns %APIConnectionError{} when the http client responds with {:error, _}" do

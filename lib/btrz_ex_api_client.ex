@@ -31,7 +31,10 @@ defmodule BtrzExApiClient do
     Failure to properly authenticate yourself in the request.
     """
     @derive Jason.Encoder
-    defexception type: "authentication_error", code: nil, status: nil, message: nil
+    defexception type: "authentication_error",
+                 code: "UNAUTHORIZED",
+                 status: 401,
+                 message: "Unauthorized"
   end
 
   defmodule InvalidRequestError do
@@ -39,7 +42,7 @@ defmodule BtrzExApiClient do
     Invalid request errors arise when your request has invalid parameters.
     """
     @derive Jason.Encoder
-    defexception type: "invalid_request_error", code: nil, status: nil, message: nil, param: nil
+    defexception type: "invalid_request_error", code: nil, status: nil, message: nil
   end
 
   @doc """
@@ -132,29 +135,30 @@ defmodule BtrzExApiClient do
     {:ok, process_response_body(body)}
   end
 
+  defp handle_response({:ok, %{status_code: 401}}) do
+    {:error, %AuthenticationError{}}
+  end
+
   defp handle_response({:ok, %{body: body, status_code: status_code}}) do
     error_struct =
       try do
-        %{"message" => message} =
-          error =
+        %{"message" => message, "code" => code} =
           body
           |> process_response_body()
-          |> Map.fetch!("error")
 
         case status_code do
           status_code when status_code in [400, 404] ->
             %InvalidRequestError{
               message: message,
               status: status_code,
-              code: error["code"],
-              param: error["param"]
+              code: code
             }
 
-          401 ->
-            %AuthenticationError{message: message, status: status_code}
+          # 401 ->
+          #   %AuthenticationError{code: code, message: message, status: status_code}
 
           _ ->
-            %APIError{message: message, status: status_code}
+            %APIError{code: code, message: message, status: status_code}
         end
       rescue
         _ ->
