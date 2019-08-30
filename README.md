@@ -10,7 +10,7 @@ API documentation at HexDocs [https://hexdocs.pm/btrz_ex_api_client](https://hex
 
 ```elixir
 def deps do
-  [{:btrz_ex_api_client, "~> 0.1.0"}]
+  [{:btrz_ex_api_client, "~> 0.6.0"}]
 end
 ```
 
