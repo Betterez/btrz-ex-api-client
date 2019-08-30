@@ -75,7 +75,7 @@ defmodule BtrzExApiClient do
           | {:ok, term()}
   def request(action, endpoint, query, body, headers, opts \\ [])
       when action in @allowed_methods do
-    opts = Keyword.merge([hackney: [pool: :default]], opts)
+    opts = Keyword.merge([hackney: [pool: :default], timeout: 60_000, recv_timeout: 60_000], opts)
 
     @http_client.request(
       action,

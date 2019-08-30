@@ -169,6 +169,20 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Webhooks.request(:patch, "a/path", query, data, x_api_key: key)
   end
 
+  test "default timeouts for all the requests" do
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, _endpoint, _data, _headers, opts ->
+      assert action == :get
+      assert opts[:hackney] == [pool: :default]
+      assert opts[:timeout] == 60_000
+      assert opts[:recv_timeout] == 60_000
+
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.request(:get, "a/path", [], [], [])
+  end
+
   test "passing a timeout option to a generic request" do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, _endpoint, _data, _headers, opts ->
