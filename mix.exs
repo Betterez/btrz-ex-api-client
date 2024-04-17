@@ -2,7 +2,7 @@ defmodule BtrzExApiClient.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/Betterez/btrz-ex-api-client"
-  @version "0.8.0"
+  @version "0.9.0"
 
   def project do
     [
@@ -74,7 +74,8 @@ defmodule BtrzExApiClient.MixProject do
       ],
       Operations: [
         BtrzExApiClient.Operations.Ticket,
-        BtrzExApiClient.Operations.Transaction
+        BtrzExApiClient.Operations.Transaction,
+        BtrzExApiClient.Operations.Manifest.DispatchReporting
       ],
       Webhooks: [
         BtrzExApiClient.Webhooks.Subscription,

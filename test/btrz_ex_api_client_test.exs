@@ -149,6 +149,19 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Operations.request(:put, "a/path", query, data, x_api_key: key)
   end
 
+  test "call dispatch reporting manifest endpoint" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, _data, headers, _opts ->
+      assert action == :get
+      assert endpoint == "#{Application.get_env(:btrz_ex_api_client, :services)[:operations]}manifests/dispatch/reporting/1234"
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Operations.request(:get, "manifests/dispatch/reporting/1234", [], [], x_api_key: key)
+  end
+
   test "call a custom path for Webhooks service" do
     key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
     query = [field: "val"]
