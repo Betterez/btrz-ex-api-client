@@ -12,7 +12,7 @@ defmodule BtrzExApiClient.Operations.Manifest do
     path() <> "/dispatch/reporting/" <> id
   end
 
-  def dispatch_reporting(id, opts \\ []) do
-    BtrzExApiClient.request(:get, dispatch_reporting_path(id), [], %{}, opts)
+  def dispatch_reporting(id, headers \\ [], opts \\ []) do
+    BtrzExApiClient.request(:get, dispatch_reporting_path(id), [], %{}, headers, opts)
   end
 end
