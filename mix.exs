@@ -79,7 +79,8 @@ defmodule BtrzExApiClient.MixProject do
       ],
       Webhooks: [
         BtrzExApiClient.Webhooks.Subscription,
-        BtrzExApiClient.Webhooks.Undelivered
+        BtrzExApiClient.Webhooks.Undelivered,
+        BtrzExApiClient.Webhooks.Failed
       ]
     ]
   end

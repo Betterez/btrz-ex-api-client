@@ -186,6 +186,26 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Webhooks.request(:patch, "a/path", query, data, x_api_key: key)
   end
 
+  test "call for Webhooks failed service" do
+    key = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9"
+    query = [field: "val"]
+    data = %{key: "val"}
+
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn action, endpoint, reqdata, headers, _opts ->
+      assert action == :post
+
+      assert endpoint ==
+               "#{Application.get_env(:btrz_ex_api_client, :services)[:webhooks]}failed"
+
+      assert reqdata == Jason.encode!(data)
+      assert {"x-api-key", ^key} = find_header(headers, "x-api-key")
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    BtrzExApiClient.Webhooks.Failed.create(data, x_api_key: key)
+  end
+
   test "default timeouts for all the requests" do
     BtrzExApiClient.HTTPClientMock
     |> expect(:request, fn action, _endpoint, _data, _headers, opts ->
