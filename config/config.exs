@@ -1,7 +1,5 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
-use Mix.Config
+import Config
 
-if Mix.env() == :test do
-  import_config "#{Mix.env()}.exs"
+if File.exists?(Path.join(__DIR__, "#{config_env()}.exs")) do
+  import_config "#{config_env()}.exs"
 end

@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :btrz_ex_api_client, :http_client, BtrzExApiClient.HTTPClientMock
 
@@ -17,3 +17,9 @@ config :btrz_ex_api_client, :services,
 config :btrz_ex_api_client, :internal_token,
   main_secret: "Hf45fFc89SJ204kowbPIQ3Ui2Oxn2a8OWlEi6RTkuOd0jHvZiZh0EWwOxSVul5eS",
   secondary_secret: "0IAWv5Qe1Mvp5x5xtv1rpxFsO38ylCSXV6uQktSIGoQob79ELkjbNQUWIxOKoaU4"
+
+config :opentelemetry,
+  traces_exporter: :none,
+  processors: [
+    {:otel_simple_processor, %{}}
+  ]

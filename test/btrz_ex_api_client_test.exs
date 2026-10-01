@@ -246,6 +246,54 @@ defmodule BtrzExApiClientTest do
     BtrzExApiClient.Accounts.User.list([internal: true], [], recv_timeout: 15_000)
   end
 
+  test "outbound request carries traceparent, grafana trace id, and raw amzn trace id from an active span" do
+    require OpenTelemetry.Tracer
+
+    Logger.metadata(amzn_trace_id: "Root=1-abc")
+
+    OpenTelemetry.Tracer.with_span "client-test" do
+      span_ctx = OpenTelemetry.Tracer.current_span_ctx()
+      trace_id = OpenTelemetry.Span.hex_trace_id(span_ctx) |> to_string()
+
+      BtrzExApiClient.HTTPClientMock
+      |> expect(:request, fn _action, _endpoint, _data, headers, _opts ->
+        {"traceparent", traceparent} = find_header(headers, "traceparent")
+        assert String.starts_with?(traceparent, "00-#{trace_id}-")
+        assert {"x-grafana-trace-id", ^trace_id} = find_header(headers, "x-grafana-trace-id")
+        assert {"x-amzn-trace-id", "Root=1-abc"} = find_header(headers, "x-amzn-trace-id")
+        {:ok, %{body: "{}", status_code: 200}}
+      end)
+
+      assert {:ok, _} = BtrzExApiClient.request(:get, "a/path", [], [], [])
+    end
+  end
+
+  test "request without a parent span still succeeds without a malformed trace id" do
+    BtrzExApiClient.HTTPClientMock
+    |> expect(:request, fn _action, _endpoint, _data, headers, _opts ->
+      case find_header(headers, "traceparent") do
+        nil ->
+          :ok
+
+        {"traceparent", value} ->
+          refute value =~ ~r/00-0{32}-/
+      end
+
+      case find_header(headers, "x-grafana-trace-id") do
+        nil ->
+          :ok
+
+        {"x-grafana-trace-id", value} ->
+          refute value == "-"
+          refute value == String.duplicate("0", 32)
+      end
+
+      {:ok, %{body: "{}", status_code: 200}}
+    end)
+
+    assert {:ok, _} = BtrzExApiClient.request(:get, "a/path", [], [], [])
+  end
+
   defp find_header(headers, header_key) do
     Enum.find(headers, fn {k, _v} ->
       k == header_key

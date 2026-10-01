@@ -45,6 +45,8 @@ defmodule BtrzExApiClient.MixProject do
       {:httpoison, "~> 1.4"},
       {:jason, "~> 1.1"},
       {:btrz_ex_auth_api, "~> 1.3.0"},
+      {:opentelemetry_api, "~> 1.5"},
+      {:opentelemetry, "~> 1.5", only: :test},
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:mox, "~> 0.4", only: :test}
     ]

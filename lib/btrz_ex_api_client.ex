@@ -3,11 +3,17 @@ defmodule BtrzExApiClient do
   Main module to handle requests to the Betterez's APIs.
   """
 
+  require OpenTelemetry.Tracer
+  require Logger
+
   alias BtrzExApiClient.Types
 
-  @http_client Application.get_env(:btrz_ex_api_client, :http_client) || BtrzExApiClient.HTTPoison
   @client_version Mix.Project.config()[:version]
   @allowed_methods [:get, :post, :put, :patch, :delete]
+
+  defp http_client do
+    Application.get_env(:btrz_ex_api_client, :http_client) || BtrzExApiClient.HTTPoison
+  end
 
   defmodule APIConnectionError do
     @moduledoc """
@@ -76,15 +82,32 @@ defmodule BtrzExApiClient do
   def request(action, endpoint, query, body, headers, opts \\ [])
       when action in @allowed_methods do
     opts = Keyword.merge([hackney: [pool: :default], timeout: 60_000, recv_timeout: 60_000], opts)
+    url = request_url(endpoint, query)
+    method = action |> to_string() |> String.upcase()
 
-    @http_client.request(
-      action,
-      request_url(endpoint, query),
-      Jason.encode!(body),
-      create_headers(headers),
-      opts
-    )
-    |> handle_response
+    OpenTelemetry.Tracer.with_span "HTTP #{method}", %{
+      kind: :client,
+      attributes: %{"http.method" => method, "http.url" => url}
+    } do
+      request_headers =
+        headers
+        |> create_headers()
+        |> maybe_inject_trace_context()
+        |> maybe_put_grafana_trace_id()
+        |> maybe_put_amzn_trace_id()
+
+      result =
+        http_client().request(
+          action,
+          url,
+          Jason.encode!(body),
+          request_headers,
+          opts
+        )
+
+      set_response_span_status(result)
+      handle_response(result)
+    end
   end
 
   defp request_url(endpoint) do
@@ -109,6 +132,70 @@ defmodule BtrzExApiClient do
     ]
     |> maybe_put_key(opts[:x_api_key])
     |> maybe_put_token(opts)
+  end
+
+  defp maybe_inject_trace_context(headers) do
+    :otel_propagator_text_map.inject([])
+    |> Enum.reduce(headers, fn {key, value}, acc ->
+      [{to_string(key), to_string(value)} | acc]
+    end)
+  end
+
+  defp maybe_put_grafana_trace_id(headers) do
+    case current_trace_id() do
+      id when is_binary(id) ->
+        [{"x-grafana-trace-id", id} | headers]
+
+      _ ->
+        headers
+    end
+  end
+
+  defp current_trace_id do
+    span_ctx = OpenTelemetry.Tracer.current_span_ctx()
+
+    cond do
+      span_ctx == :undefined ->
+        nil
+
+      not OpenTelemetry.Span.is_valid(span_ctx) ->
+        nil
+
+      true ->
+        id =
+          span_ctx
+          |> OpenTelemetry.Span.hex_trace_id()
+          |> to_string()
+
+        if id == "" or id == String.duplicate("0", 32) do
+          nil
+        else
+          id
+        end
+    end
+  end
+
+  defp maybe_put_amzn_trace_id(headers) do
+    case Keyword.get(Logger.metadata(), :amzn_trace_id) do
+      id when is_binary(id) and id != "" and id != "-" ->
+        [{"x-amzn-trace-id", id} | headers]
+
+      _ ->
+        headers
+    end
+  end
+
+  defp set_response_span_status({:ok, %{status_code: status}}) when status >= 500 do
+    OpenTelemetry.Tracer.set_attributes(%{"http.status_code" => status})
+    OpenTelemetry.Tracer.set_status(:error, "HTTP #{status}")
+  end
+
+  defp set_response_span_status({:ok, %{status_code: status}}) do
+    OpenTelemetry.Tracer.set_attributes(%{"http.status_code" => status})
+  end
+
+  defp set_response_span_status({:error, _}) do
+    OpenTelemetry.Tracer.set_status(:error, "connection error")
   end
 
   defp maybe_put_key(headers, nil), do: headers
@@ -153,9 +240,6 @@ defmodule BtrzExApiClient do
               status: status_code,
               code: code
             }
-
-          # 401 ->
-          #   %AuthenticationError{code: code, message: message, status: status_code}
 
           _ ->
             %APIError{code: code, message: message, status: status_code}
